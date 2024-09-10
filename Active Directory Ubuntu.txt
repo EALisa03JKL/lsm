@@ -1,0 +1,27 @@
+#SCRIPT ACTIVE DIRECTORY EN UBUNTU CLIENTE
+sudo apt update
+sudo apt-get install net-tools
+sudo apt install git
+sudo wget https://github.com/BeyondTrust/pbis-open/releases/download/9.1.0/pbis-open-9.1.0.551.linux.x86_64.deb.sh
+sudo chmod 777 pbis-open-9.1.0.551.linux.x86_64.deb.sh
+sudo bash ./pbis-open-9.1.0.551.linux.x86_64.deb.sh
+
+ifconfig
+sudo bash -c "cat <<EOF> /etc/netplan/01-network-manager-all.yaml
+  ethernets:
+   enp0s8:
+    dhcp4: no
+    dhcp6: no
+    addresses: [192.168.126.160/24]
+    gateway4: 192.168.126.140
+    nameservers:
+     addresses: [192.168.126.140]
+EOF"
+
+sudo netplan apply
+read -p "Ingrese el nombre del dominio: " dominio
+sudo domainjoin-cli join --disable ssh $dominio Administrator@$dominio
+sudo bash -c "cat <<EOF> /usr/share/lightdm/lightdm.conf.d/50-ubuntu.conf
+greeter-show-manual-login=true
+EOF"
+sudo /opt/pbis/bin/config LoginShelltemplate /bin/bash
